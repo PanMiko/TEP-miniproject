@@ -143,7 +143,9 @@
     <ClCompile Include="miniprojekt.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ErrorsMessages.h" />
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="MyExcepiton.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
