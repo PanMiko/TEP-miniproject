@@ -40,13 +40,6 @@ int main()
 	std::cout << "\n\n========== READ FROM FILE TEST ==========\n\n";
 	readFromFileTest();
 
-	//std::cout << "\n\n===== PLIKI ======\n\n";
-	//Matrix<double> plik;
-
-	//plik.readFromFileAndSave("wsad_double.txt");
-
-	//plik.print();
-
 	std::cout << "\n\n@@@@@@@@@@@@@@@@\n\n\n";
 }
 
@@ -375,5 +368,40 @@ void toIdendityTest() {
 }
 
 void readFromFileTest() {
+	int error = 0;
 
+	Matrix<int> m1;
+
+	m1.readFromFileAndSave("wsad_int.txt", &error);
+
+	m1.print();
+	std::cout << "!!! error status: " << error << '\n';
+
+	m1.readFromFileAndSave("wsad_double.txt", &error);
+
+	m1.print();
+	std::cout << "!!! error status: " << error << '\n';
+
+	m1.readFromFileAndSave("ERROR.txt", &error);
+
+	m1.print();
+	std::cout << "!!! error status: " << error << '\n';
+
+	Matrix<double> m2;
+	error = 0;
+
+	m2.readFromFileAndSave("wsad_int.txt", &error);
+	 
+	m2.print();
+	std::cout << "!!! error status: " << error << '\n';
+	 
+	m2.readFromFileAndSave("wsad_double.txt", &error);
+	 
+	m2.print();
+	std::cout << "!!! error status: " << error << '\n';
+	 
+	m2.readFromFileAndSave("ERROR.txt", &error);
+	 
+	m2.print();
+	std::cout << "!!! error status: " << error << '\n';
 }

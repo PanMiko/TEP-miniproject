@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <stdlib.h>
 #include <vector>
 #include <stdio.h>
@@ -25,6 +26,7 @@ private:
 	void copyFields(const Matrix<T>& other);
 	void deleteFields();
 	void toMove(Matrix<T>& other);
+	void initializeFields(int rows, int cols);
 
 public:
 //=============================================================================
@@ -110,7 +112,7 @@ public:
 	Matrix<T>& modifyToIdentityMatrix(int *error = 0);
 
 	// reading from file and saving it to Matrix
-	Matrix<T>& readFromFileAndSave(std::string fileName);
+	Matrix<T>& readFromFileAndSave(std::string fileName, int* error = 0);
 
 	//getters & helper methods
 	int getRowsNumber();
@@ -172,13 +174,15 @@ public:
 // default constructor
 template<typename T>
 Matrix<T>::Matrix() {
-	matrix = new T * [DEFAULT_SIZE];
-	rowsNumber = DEFAULT_SIZE;
+	initializeFields(DEFAULT_SIZE, DEFAULT_SIZE);
+	/*rowsNumber = DEFAULT_SIZE;
 	colsNumber = DEFAULT_SIZE;
+
+	matrix = new T * [DEFAULT_SIZE];
 
 	for (int i = 0; i < DEFAULT_SIZE; i++) {
 		matrix[i] = new T[DEFAULT_SIZE];
-	}
+	}*/
 }
 
 // constructor with parameters
@@ -195,13 +199,14 @@ Matrix<T>::Matrix(int rowsNumber, int colsNumber, int* error) {
 
 	// NO error
 	else {
-		matrix = new T * [rowsNumber];
+		initializeFields(rowsNumber, colsNumber);
+		/*matrix = new T * [rowsNumber];
 		this->rowsNumber = rowsNumber;
 		this->colsNumber = colsNumber;
 
 		for (int i = 0; i < rowsNumber; i++) {
 			matrix[i] = new T[colsNumber];
-		}
+		}*/
 	}
 }
 
@@ -580,14 +585,7 @@ Matrix<T>& Matrix<T>::transpose(int *error) {
 
 		deleteFields();
 
-		rowsNumber = result.rowsNumber;
-		colsNumber = result.colsNumber;
-
-		matrix = new T * [rowsNumber];
-
-		for (int i = 0; i < rowsNumber; i++) {
-			matrix[i] = new T[colsNumber];
-		}
+		initializeFields(result.rowsNumber, colsNumber);
 
 		for (int i = 0; i < rowsNumber; i++) {
 			for (int j = 0; j < colsNumber; j++) {
@@ -624,7 +622,7 @@ Matrix<T>& Matrix<T>::modifyToIdentityMatrix(int *error) {
 
 // reading from file and saving it to Matrix
 template<typename T>
-Matrix<T>& Matrix<T>::readFromFileAndSave(std::string fileName) {
+Matrix<T>& Matrix<T>::readFromFileAndSave(std::string fileName, int* error) {
 	std::string number;
 	std::ifstream myFile(fileName);
 
@@ -633,40 +631,34 @@ Matrix<T>& Matrix<T>::readFromFileAndSave(std::string fileName) {
 	int rows = 0;
 	int cols = 0;
 
+	double x;
+
+	// NO error
 	if (myFile.is_open()) {
-		while (std::getline(myFile, number)) rows++;
-		myFile.close();
-	}
-	else std::cout << ">>> nie mozna otworzyc pliku!\n";
-
-	myFile.open(fileName);
-	if (myFile.is_open()) { 
-		while (!myFile.eof()) {
-			myFile >> number;
-			double x = std::atof(number.c_str());
-			nums.push_back(x);
+		while (std::getline(myFile, number)) {
+			std::stringstream stream(number);
+			while (stream >> x) {
+				nums.push_back(x);
+			}
+			rows++;
 		}
 		myFile.close();
-	}
-	else std::cout << ">>> nie mozna otworzyc pliku!\n";
 
-	cols = nums.size() / rows;
+		cols = nums.size() / rows;
 
-	deleteFields();
+		deleteFields();
 
-	rowsNumber = rows;
-	colsNumber = cols;
+		initializeFields(rows, cols);
 
-	matrix = new T * [rowsNumber];
-
-	for (int i = 0; i < rowsNumber; i++) {
-		matrix[i] = new T[colsNumber];
-	}
-
-	for (int i = 0; i < rowsNumber; i++) {
-		for (int j = 0; j < colsNumber; j++) {
-			matrix[i][j] = nums[colsNumber * i + j];
+		for (int i = 0; i < rowsNumber; i++) {
+			for (int j = 0; j < colsNumber; j++) {
+				matrix[i][j] = nums[colsNumber * i + j];
+			}
 		}
+	}
+	// error
+	else {
+		if (error != nullptr) *error = CANNOT_OPEN_FILE;
 	}
 
 	return *this;
@@ -727,22 +719,38 @@ void Matrix<T>::toMove(Matrix<T>& other) {
 	other.colsNumber = -1;
 }
 
+// private initialize mehtod
+template<typename T>
+void Matrix<T>::initializeFields(int rows, int cols) {
+	rowsNumber = rows;
+	colsNumber = cols;
+
+	matrix = new T * [rowsNumber];
+
+	for (int i = 0; i < rowsNumber; i++) {
+		matrix[i] = new T[colsNumber];
+	}
+}
+
 // printing rowsNumber, colsNumber and matrix
 template<typename T>
 void Matrix<T>::print(int* error) {
 	// error
 	if (matrix == nullptr) {
 		if (error != nullptr) *error = MATRIX_IS_NULL;
+		std::cout << "\nMATRIX IS NULL!\n";
 	}
 
 	// NO error
-	std::cout << "rows: " << rowsNumber << " | cols: " << colsNumber << '\n';
-	
-	for (int i = 0; i < rowsNumber; i++) {
-		for (int j = 0; j < colsNumber; j++) {
-			std::cout << matrix[i][j] << " ";
+	else {
+		std::cout << "\nrows: " << rowsNumber << " | cols: " << colsNumber << '\n';
+
+		for (int i = 0; i < rowsNumber; i++) {
+			for (int j = 0; j < colsNumber; j++) {
+				std::cout << matrix[i][j] << " ";
+			}
+			std::cout << '\n';
 		}
-		std::cout << '\n';
 	}
 }
 
